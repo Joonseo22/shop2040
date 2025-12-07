@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>2040 로그인</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<h1>로그인</h1>
+<hr>
+<form action="/login" method="post">
+    <div>
+        <label for="email">이메일</label><br>
+        <input type="email" id="email" name="email" placeholder="이메일을 입력하세요">
+    </div>
+    <br>
+
+    <div>
+        <label for="password">비밀번호</label><br>
+        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요">
+    </div>
+    <br>
+    <button type="submit">로그인</button>
+    <button type="button" onclick="location.href='/join'">회원가입</button>
+</form>
+
+</body>
+</html>

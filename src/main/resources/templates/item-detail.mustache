@@ -1,0 +1,38 @@
+{{>layout/header}}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{item.imgUrl}}" class="img-fluid rounded shadow" alt="{{item.name}}" style="width: 100%;">
+        </div>
+
+        <div class="col-md-6">
+            <span class="badge bg-secondary mb-2">{{item.brand}}</span>
+            <h2 class="fw-bold">{{item.name}}</h2>
+            <p class="text-muted">상품 ID: {{item.id}}</p>
+
+            <hr>
+
+            <h3 class="fw-bold mb-4">{{item.price}}원</h3>
+
+            <form action="/cart/add" method="post">
+                <input type="hidden" name="itemId" value="{{item.id}}">
+
+                <div class="mb-3">
+                    <label class="form-label">수량</label>
+                    <input type="number" name="count" class="form-control" value="1" min="1" max="10">
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-lg" type="submit">장바구니 담기</button>
+                </div>
+            </form>
+            <div class="mt-4 p-3 bg-light rounded">
+                <h5>배송 안내</h5>
+                <p class="mb-0 text-secondary">지금 주문하면 <strong>내일 도착</strong> 예정입니다.<br>무료 배송 혜택을 놓치지 마세요!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{>layout/footer}}

@@ -1,0 +1,51 @@
+{{>layout/header}}
+
+<div class="container mt-5">
+    <h2>🛒 나의 장바구니</h2>
+    <hr>
+
+    <table class="table table-hover mt-4 text-center align-middle">
+        <thead class="table-light">
+        <tr>
+            <th>상품정보</th>
+            <th>가격</th>
+            <th>수량</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#cartItems}}
+            <tr>
+                <td class="text-start">
+                    <img src="{{item.imgUrl}}" width="60" height="60" class="rounded me-2">
+                    <span class="fw-bold">{{item.name}}</span>
+                </td>
+                <td>{{item.price}}원</td>
+                <td>{{count}}개</td>
+                <td>
+                <td>
+                    <form action="/cart/delete" method="post">
+                        <input type="hidden" name="cartItemId" value="{{id}}">
+                        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                    </form>
+                </td>
+                </td>
+            </tr>
+        {{/cartItems}}
+
+        {{^cartItems}}
+            <tr>
+                <td colspan="4" class="py-5">장바구니가 비어있습니다.</td>
+            </tr>
+        {{/cartItems}}
+        </tbody>
+    </table>
+
+    <div class="d-grid gap-2 col-6 mx-auto mt-5">
+        <form action="/cart/checkout" method="post">
+            <button type="submit" class="btn btn-dark btn-lg w-100">전체 주문하기</button>
+        </form>
+    </div>
+</div>
+
+{{>layout/footer}}
