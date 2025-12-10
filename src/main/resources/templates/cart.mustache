@@ -1,51 +1,152 @@
 {{>layout/header}}
 
 <div class="container mt-5">
-    <h2>🛒 나의 장바구니</h2>
+    <h2>나의 장바구니</h2>
     <hr>
 
-    <table class="table table-hover mt-4 text-center align-middle">
-        <thead class="table-light">
-        <tr>
-            <th>상품정보</th>
-            <th>가격</th>
-            <th>수량</th>
-            <th>관리</th>
-        </tr>
-        </thead>
-        <tbody>
-        {{#cartItems}}
-            <tr>
-                <td class="text-start">
-                    <img src="{{item.imgUrl}}" width="60" height="60" class="rounded me-2">
-                    <span class="fw-bold">{{item.name}}</span>
-                </td>
-                <td>{{item.price}}원</td>
-                <td>{{count}}개</td>
-                <td>
-                <td>
-                    <form action="/cart/delete" method="post">
-                        <input type="hidden" name="cartItemId" value="{{id}}">
-                        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+    <div class="row">
+        <div class="col-lg-8">
+            <table class="table table-hover mt-4 text-center align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>상품정보</th>
+                    <th>가격</th>
+                    <th>수량</th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#cartItems}}
+                    <tr>
+                        <td class="text-start">
+                            <img src="{{item.imgUrl}}" width="60" height="60" class="rounded me-2">
+                            <span class="fw-bold">{{item.name}}</span>
+                        </td>
+                        <td>{{item.price}}원</td>
+                        <td>{{count}}개</td>
+                        <td>
+                            <form action="/cart/delete" method="post">
+                                <input type="hidden" name="cartItemId" value="{{id}}">
+                                <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                {{/cartItems}}
+
+                {{^cartItems}}
+                    <tr>
+                        <td colspan="4" class="py-5">장바구니가 비어있습니다.</td>
+                    </tr>
+                {{/cartItems}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-header bg-dark text-white fw-bold">
+                    📝 주문서 작성
+                </div>
+                <div class="card-body p-4">
+
+                    <form action="/cart/checkout" method="post" onsubmit="return validateOrder()">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">🚚 배송지 선택</label>
+                            {{#addresses.0}}
+                                <select class="form-select" name="addressId" required>
+                                    {{#addresses}}
+                                        <option value="{{id}}">[{{addressName}}] {{fullAddress}}</option>
+                                    {{/addresses}}
+                                </select>
+                            {{/addresses.0}}
+
+                            {{^addresses.0}}
+                                <div class="alert alert-warning p-2 small">
+                                    등록된 배송지가 없습니다.<br>
+                                    <a href="/shipping" class="fw-bold">배송지 등록하러 가기</a>
+                                </div>
+                            {{/addresses.0}}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">💳 결제수단 선택</label>
+                            {{#cards.0}}
+                                <select class="form-select" name="cardId" required>
+                                    {{#cards}}
+                                        <option value="{{id}}">{{cardCompany}} ({{cardNickname}})</option>
+                                    {{/cards}}
+                                </select>
+                            {{/cards.0}}
+
+                            {{^cards.0}}
+                                <div class="alert alert-warning p-2 small">
+                                    등록된 카드가 없습니다.<br>
+                                    <a href="/payment" class="fw-bold">카드 등록하러 가기</a>
+                                </div>
+                            {{/cards.0}}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small">🎟️ 쿠폰 적용</label>
+                            <select class="form-select" name="memberCouponId" id="couponSelect" onchange="applyCoupon()">
+                                <option value="0" data-discount="0">선택안함</option>
+                                {{#myCoupons}}
+                                    <option value="{{id}}" data-discount="{{coupon.discountPrice}}">
+                                        {{coupon.name}} (-{{coupon.discountPrice}}원)
+                                    </option>
+                                {{/myCoupons}}
+                            </select>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>총 상품 금액</span>
+                            <span class="fw-bold" id="originPrice">{{totalPrice}}</span>원
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3 text-primary">
+                            <span>쿠폰 할인</span>
+                            <span>- <span id="discountAmount">0</span>원</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="h5 fw-bold">최종 결제 금액</span>
+                            <span class="h4 fw-bold text-danger" id="finalPrice">{{totalPrice}}</span><span class="h5 fw-bold text-danger">원</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark btn-lg w-100 py-3" {{^addresses.0}}disabled{{/addresses.0}} {{^cards.0}}disabled{{/cards.0}}>
+                            결제하기
+                        </button>
+
+                        {{^addresses.0}}<p class="text-danger small text-center mt-2">배송지/결제수단을 먼저 등록해주세요.</p>{{/addresses.0}}
                     </form>
-                </td>
-                </td>
-            </tr>
-        {{/cartItems}}
-
-        {{^cartItems}}
-            <tr>
-                <td colspan="4" class="py-5">장바구니가 비어있습니다.</td>
-            </tr>
-        {{/cartItems}}
-        </tbody>
-    </table>
-
-    <div class="d-grid gap-2 col-6 mx-auto mt-5">
-        <form action="/cart/checkout" method="post">
-            <button type="submit" class="btn btn-dark btn-lg w-100">전체 주문하기</button>
-        </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 {{>layout/footer}}
+
+<script>
+    function applyCoupon() {
+        const select = document.getElementById('couponSelect');
+        const selectedOption = select.options[select.selectedIndex];
+
+        const originPrice = parseInt(document.getElementById('originPrice').innerText);
+        const discount = parseInt(selectedOption.getAttribute('data-discount'));
+
+        let final = originPrice - discount;
+        if(final < 0) final = 0;
+
+        document.getElementById('discountAmount').innerText = discount;
+        document.getElementById('finalPrice').innerText = final;
+    }
+
+    function validateOrder() {
+        // 추가적인 검증이 필요하면 여기서
+        return confirm('결제를 진행하시겠습니까?');
+    }
+</script>

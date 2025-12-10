@@ -1,0 +1,39 @@
+{{>layout/header}}
+
+<div class="container mt-5">
+    <h2 class="fw-bold mb-4">나의 찜 목록</h2>
+
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {{#wishlist}}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+                    <form action="/wish/{{item.id}}" method="post" class="position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                        <button type="submit" class="btn btn-light rounded-circle shadow-sm p-0 d-flex justify-content-center align-items-center" style="width: 30px; height: 30px; opacity: 0.8;">
+                            ✕
+                        </button>
+                    </form>
+
+                    <a href="/item/{{item.id}}" class="text-decoration-none text-dark">
+                        <img src="{{item.imgUrl}}" class="card-img-top" alt="{{item.name}}" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold" style="font-size: 16px;">{{item.name}}</h5>
+                            <p class="card-text text-danger fw-bold">{{item.price}}원</p>
+                            <p class="card-text text-muted small">{{item.brand}}</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {{/wishlist}}
+    </div>
+
+    {{^wishlist}}
+        <div class="text-center py-5">
+            <div class="fs-1 mb-3"></div>
+            <h4 class="text-muted">아직 찜한 상품이 없습니다.</h4>
+            <p class="text-secondary">마음에 드는 상품에 하트를 눌러보세요!</p>
+            <a href="/" class="btn btn-dark mt-3 rounded-pill px-4">쇼핑하러 가기</a>
+        </div>
+    {{/wishlist}}
+</div>
+
+{{>layout/footer}}

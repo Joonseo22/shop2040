@@ -1,45 +1,113 @@
 {{>layout/header}}
 
-<div class="container mt-5">
-    <h2>📦 나의 주문 내역</h2>
-    <hr>
+<style>
+    .step-wizard { display: flex; justify-content: space-between; position: relative; margin-top: 20px; }
+    .step-wizard::before { content: ""; position: absolute; top: 15px; left: 0; width: 100%; height: 4px; background-color: #e9ecef; z-index: 0; }
+    .step-item { position: relative; z-index: 1; text-align: center; width: 33.33%; }
+    .step-circle { width: 30px; height: 30px; border-radius: 50%; background-color: #e9ecef; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; border: 4px solid #fff; }
+    .step-text { font-size: 12px; margin-top: 5px; color: #6c757d; font-weight: bold;}
+    .active .step-circle { background-color: #0d6efd; box-shadow: 0 0 0 3px #cfe2ff; }
+    .active .step-text { color: #0d6efd; }
+    .completed .step-circle { background-color: #198754; }
+    .completed .step-text { color: #198754; }
+</style>
 
-    <table class="table table-hover mt-4">
-        <thead class="table-light">
-        <tr>
-            <th>주문번호</th>
-            <th>상품 사진</th>
-            <th>상품명</th>
-            <th>브랜드</th>
-            <th>주문 일시</th>
-        </tr>
-        </thead>
-        <tbody>
-        {{#orders}}
-            <tr>
-                <td>{{id}}</td>
-                <td>
-                    <img src="{{item.imgUrl}}" width="60" height="60" style="object-fit: cover; border-radius: 5px;">
-                </td>
-                <td class="fw-bold">{{item.name}}</td>
-                <td>{{item.brand}}</td>
-                <td>{{orderDate}}</td>
-            </tr>
-        {{/orders}}
+<div class="container mt-5" style="max-width: 800px;">
+    <h2 class="mb-4 fw-bold">주문 내역</h2>
 
-        {{^orders}}
-            <tr>
-                <td colspan="5" class="text-center py-5">
-                    아직 주문 내역이 없습니다. 쇼핑을 즐겨보세요!
-                </td>
-            </tr>
-        {{/orders}}
-        </tbody>
-    </table>
+    {{#orders}}
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">{{orderDate}} 주문</span>
+                    <span class="text-muted small">주문번호 #{{id}}</span>
+                </div>
+            </div>
 
-    <div class="mt-4 text-center">
-        <a href="/" class="btn btn-primary">쇼핑 계속하기</a>
-    </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <img src="{{item.imgUrl}}" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                    </div>
+
+                    <div class="col-md-5">
+                        <span class="badge bg-light text-dark border mb-1">{{item.brand}}</span>
+                        <h5 class="fw-bold mb-1">{{item.name}}</h5>
+
+                        {{#hasDiscount}}
+                            <div>
+                                <span class="text-decoration-line-through text-muted small me-1">{{item.price}}원</span>
+                                <span class="badge bg-danger">쿠폰적용</span>
+                            </div>
+                            <p class="mb-0 fw-bold text-danger fs-5">{{finalPrice}}원</p>
+                        {{/hasDiscount}}
+
+                        {{^hasDiscount}}
+                            <p class="mb-0 fw-bold text-primary">{{item.price}}원</p>
+                        {{/hasDiscount}}
+
+                        <div class="mt-2 small text-muted bg-light p-2 rounded">
+                            <div><i class="fas fa-truck me-1"></i> {{shippingAddress}}</div>
+                            <div><i class="far fa-credit-card me-1"></i> {{paymentInfo}}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        {{#isCanceled}}
+                            <div class="alert alert-danger text-center py-2 mb-0" role="alert">
+                                 <strong>주문이 취소되었습니다</strong>
+                            </div>
+                        {{/isCanceled}}
+
+                        {{^isCanceled}}
+                            <div class="step-wizard">
+                                <div class="step-item {{#isPreparing}}active{{/isPreparing}} {{#isShipping}}completed{{/isShipping}} {{#isDelivered}}completed{{/isDelivered}}">
+                                    <div class="step-circle">1</div>
+                                    <div class="step-text">상품준비</div>
+                                </div>
+
+                                <div class="step-item {{#isShipping}}active{{/isShipping}} {{#isDelivered}}completed{{/isDelivered}}">
+                                    <div class="step-circle">2</div>
+                                    <div class="step-text">배송중</div>
+                                </div>
+
+                                <div class="step-item {{#isDelivered}}active{{/isDelivered}}">
+                                    <div class="step-circle">3</div>
+                                    <div class="step-text">배송완료</div>
+                                </div>
+                            </div>
+                        {{/isCanceled}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-white border-top-0 text-end pb-3">
+                {{#isPreparing}}
+                    <form action="/order/cancel" method="post" onsubmit="return confirm('주문을 취소하시겠습니까?');">
+                        <input type="hidden" name="orderId" value="{{id}}">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">주문 취소</button>
+                    </form>
+                {{/isPreparing}}
+
+                {{#isDelivered}}
+                    {{#isReviewed}}
+                        <button class="btn btn-secondary btn-sm" disabled>리뷰 작성 완료</button>
+                    {{/isReviewed}}
+
+                    {{^isReviewed}}
+                        <a href="/review/write?orderId={{id}}" class="btn btn-primary btn-sm">✍리뷰 작성하기</a>
+                    {{/isReviewed}}
+                {{/isDelivered}}
+            </div>
+        </div>
+    {{/orders}}
+
+    {{^orders}}
+        <div class="text-center py-5">
+            <h4 class="text-muted">아직 주문 내역이 없습니다.</h4>
+            <a href="/" class="btn btn-dark mt-3">쇼핑하러 가기</a>
+        </div>
+    {{/orders}}
 </div>
 
 {{>layout/footer}}

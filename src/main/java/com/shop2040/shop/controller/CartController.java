@@ -1,13 +1,7 @@
 package com.shop2040.shop.controller;
 
-import com.shop2040.shop.entity.Cart;
-import com.shop2040.shop.entity.CartItem;
-import com.shop2040.shop.entity.Item;
-import com.shop2040.shop.entity.Member;
-import com.shop2040.shop.repository.CartItemRepository;
-import com.shop2040.shop.repository.CartRepository;
-import com.shop2040.shop.repository.ItemRepository;
-import com.shop2040.shop.repository.MemberRepository; // 멤버 정보 필요
+import com.shop2040.shop.entity.*;
+import com.shop2040.shop.repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,8 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class CartController {
@@ -26,95 +22,156 @@ public class CartController {
     @Autowired private CartItemRepository cartItemRepository;
     @Autowired private ItemRepository itemRepository;
     @Autowired private MemberRepository memberRepository;
+    @Autowired private OrderingRepository orderingRepository;
+    @Autowired private MemberCouponRepository memberCouponRepository;
 
-    // 1. 장바구니에 담기
+    // [추가] 주소와 카드 정보를 가져오기 위해 필요
+    @Autowired private AddressRepository addressRepository;
+    @Autowired private PaymentMethodRepository paymentMethodRepository;
+
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam Long itemId, @RequestParam int count, HttpSession session) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // 1-1. 내 장바구니가 있는지 확인 (없으면 생성)
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (isAdmin != null && isAdmin) return "redirect:/";
+
         Cart cart = cartRepository.findByMemberId(member.getId());
         if (cart == null) {
             cart = Cart.createCart(member);
             cartRepository.save(cart);
         }
 
-        // 1-2. 상품 조회
         Item item = itemRepository.findById(itemId).orElseThrow();
-
-        // 1-3. 이미 장바구니에 있는 상품인지 확인
         CartItem cartItem = cartItemRepository.findByCartIdAndItemId(cart.getId(), item.getId());
 
         if (cartItem == null) {
-            // 없으면 새로 생성
             cartItem = CartItem.createCartItem(cart, item, count);
             cartItemRepository.save(cartItem);
         } else {
-            // 있으면 개수만 증가
             cartItem.addCount(count);
             cartItemRepository.save(cartItem);
         }
 
-        return "redirect:/cart"; // 담고 나서 장바구니 페이지로 이동
+        return "redirect:/cart";
     }
 
-    // 2. 장바구니 조회
     @GetMapping("/cart")
     public String viewCart(Model model, HttpSession session) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // 내 장바구니 찾기
         Cart cart = cartRepository.findByMemberId(member.getId());
 
         List<CartItem> cartItems = new ArrayList<>();
+        int totalPrice = 0;
+
         if (cart != null) {
             cartItems = cartItemRepository.findByCartId(cart.getId());
+            for (CartItem ci : cartItems) {
+                String priceStr = ci.getItem().getPrice().replace(",", "");
+                totalPrice += Integer.parseInt(priceStr) * ci.getCount();
+            }
         }
 
+        List<MemberCoupon> myCoupons = memberCouponRepository.findByMemberAndIsUsedFalse(member);
+
+        // [추가] 배송지와 결제수단 목록 가져오기
+        List<Address> addresses = addressRepository.findByMember(member);
+        List<PaymentMethod> cards = paymentMethodRepository.findByMember(member);
+
         model.addAttribute("cartItems", cartItems);
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("myCoupons", myCoupons);
+        model.addAttribute("addresses", addresses); // 화면 전달
+        model.addAttribute("cards", cards);         // 화면 전달
         model.addAttribute("userName", member.getName());
-        return "cart"; // cart.mustache 보여줘라
+
+        return "cart";
     }
+
     @PostMapping("/cart/delete")
     public String deleteCartItem(@RequestParam Long cartItemId) {
         cartItemRepository.deleteById(cartItemId);
-        return "redirect:/cart"; // 삭제 후 다시 장바구니 화면으로
+        return "redirect:/cart";
     }
 
-    // [추가 2] 장바구니 물건 전체 주문 (결제)
-    @Autowired private com.shop2040.shop.repository.OrderingRepository orderingRepository; // 주문 저장소 필요
-
+    // [수정됨] 결제 로직: 배송지/결제수단 저장 추가
     @PostMapping("/cart/checkout")
-    public String checkout(HttpSession session) {
+    public String checkout(HttpSession session,
+                           @RequestParam(required = false) Long memberCouponId,
+                           @RequestParam(required = false) Long addressId,  // 배송지 ID 받기
+                           @RequestParam(required = false) Long cardId      // 카드 ID 받기
+    ) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // 1. 내 장바구니 찾기
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (isAdmin != null && isAdmin) return "redirect:/";
+
         Cart cart = cartRepository.findByMemberId(member.getId());
         if (cart == null) return "redirect:/cart";
 
-        // 2. 장바구니에 있는 모든 상품 가져오기
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        if (cartItems.isEmpty()) return "redirect:/cart";
 
-        // 3. 하나씩 꺼내서 '주문 내역(Ordering)'으로 옮기기
-        for (CartItem cartItem : cartItems) {
-            // 주문 정보 생성
-            com.shop2040.shop.entity.Ordering order = new com.shop2040.shop.entity.Ordering();
+        // 1. 배송지 정보 찾기
+        String shippingInfo = "배송지 미지정";
+        if (addressId != null) {
+            Optional<Address> addr = addressRepository.findById(addressId);
+            if (addr.isPresent()) {
+                shippingInfo = addr.get().getAddressName() + " (" + addr.get().getFullAddress() + " " + addr.get().getDetailAddress() + ")";
+            }
+        }
+
+        // 2. 결제 카드 정보 찾기
+        String paymentInfo = "결제수단 미지정";
+        if (cardId != null) {
+            Optional<PaymentMethod> card = paymentMethodRepository.findById(cardId);
+            if (card.isPresent()) {
+                paymentInfo = card.get().getCardCompany() + " (" + card.get().getCardNickname() + ")";
+            }
+        }
+
+        // 3. 쿠폰 처리
+        int discountAmount = 0;
+        if (memberCouponId != null) {
+            Optional<MemberCoupon> mcOptional = memberCouponRepository.findById(memberCouponId);
+            if (mcOptional.isPresent()) {
+                MemberCoupon mc = mcOptional.get();
+                if(mc.getMember().getId().equals(member.getId()) && !mc.isUsed()) {
+                    mc.setUsed(true);
+                    mc.setUsedDate(LocalDateTime.now());
+                    memberCouponRepository.save(mc);
+                    discountAmount = mc.getCoupon().getDiscountPrice();
+                }
+            }
+        }
+
+        // 4. 주문 생성
+        for (int i = 0; i < cartItems.size(); i++) {
+            CartItem cartItem = cartItems.get(i);
+            Ordering order = new Ordering();
             order.setMember(member);
             order.setItem(cartItem.getItem());
-            order.setOrderDate(java.time.LocalDateTime.now());
+            order.setOrderDate(LocalDateTime.now());
+            order.setStatus(OrderStatus.PREPARING);
 
-            // 주문 저장!
+            // [저장] 배송지 및 결제 정보 저장
+            order.setShippingAddress(shippingInfo);
+            order.setPaymentInfo(paymentInfo);
+
+            if (i == 0) {
+                order.setDiscountPrice(discountAmount);
+            } else {
+                order.setDiscountPrice(0);
+            }
+
             orderingRepository.save(order);
         }
 
-        // 4. 장바구니 비우기 (주문했으니까!)
         cartItemRepository.deleteAll(cartItems);
-
-        System.out.println("장바구니 결제 완료! 총 " + cartItems.size() + "건 주문됨.");
-
-        return "redirect:/my-orders"; // 주문 내역 페이지로 이동
+        return "redirect:/my-orders";
     }
 }

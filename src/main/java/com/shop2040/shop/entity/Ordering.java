@@ -7,20 +7,45 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
-public class Ordering { // Order는 DB 예약어라 겹칠 수 있어 Ordering으로 함
+public class Ordering {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 누가 샀는지 (Member와 연결)
     @ManyToOne
     private Member member;
 
-    // 무엇을 샀는지 (Item과 연결)
     @ManyToOne
     private Item item;
 
-    // 언제 샀는지
     private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    private boolean isReviewed;
+    private int discountPrice;
+
+    // [추가됨] 주문 당시의 배송지와 결제수단 정보 (텍스트로 박제)
+    private String shippingAddress;
+    private String paymentInfo;
+
+    // --- [Mustache 화면 처리를 위한 도우미 메서드들] ---
+
+    public String getFinalPrice() {
+        if (item == null) return "0";
+        int originPrice = Integer.parseInt(item.getPrice().replace(",", ""));
+        int finalPrice = originPrice - discountPrice;
+        return String.format("%,d", finalPrice);
+    }
+
+    public boolean hasDiscount() {
+        return discountPrice > 0;
+    }
+
+    public boolean isPreparing() { return this.status == OrderStatus.PREPARING; }
+    public boolean isShipping() { return this.status == OrderStatus.SHIPPING; }
+    public boolean isDelivered() { return this.status == OrderStatus.DELIVERED; }
+    public boolean isCanceled() { return this.status == OrderStatus.CANCELED; }
 }

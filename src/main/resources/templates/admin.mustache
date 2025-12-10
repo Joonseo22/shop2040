@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>관리자 페이지 - 2040 SHOP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>👮‍♂️ 관리자 주문 관리 시스템</h1>
+        <a href="/" class="btn btn-outline-dark">쇼핑몰 메인으로</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle text-center">
+                <thead class="table-dark">
+                <tr>
+                    <th>주문번호</th>
+                    <th>구매자</th>
+                    <th>상품명</th>
+                    <th>현재 상태</th>
+                    <th>상태 변경 (관리)</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#orders}}
+                    <tr>
+                        <td>{{id}}</td>
+                        <td>{{member.name}}</td>
+                        <td>{{item.name}}</td>
+                        <td>
+                            <span class="badge bg-secondary">{{status}}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <form action="/admin/order/status" method="post" class="d-inline">
+                                    <input type="hidden" name="orderId" value="{{id}}">
+                                    <input type="hidden" name="status" value="SHIPPING">
+                                    <button class="btn btn-primary btn-sm me-1">🚚 배송 시작</button>
+                                </form>
+
+                                <form action="/admin/order/status" method="post" class="d-inline">
+                                    <input type="hidden" name="orderId" value="{{id}}">
+                                    <input type="hidden" name="status" value="DELIVERED">
+                                    <button class="btn btn-success btn-sm">✅ 배송 완료</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {{/orders}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

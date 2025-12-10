@@ -1,58 +1,193 @@
 package com.shop2040.shop.controller;
 
-import com.shop2040.shop.entity.Member;
-import com.shop2040.shop.repository.MemberRepository;
-import jakarta.servlet.http.HttpSession; // 세션 사용을 위한 임포트
+import com.shop2040.shop.entity.*;
+import com.shop2040.shop.repository.*;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @Controller
 public class MemberController {
 
-    @Autowired
-    private MemberRepository memberRepository;
+    @Autowired private MemberRepository memberRepository;
+    @Autowired private CartRepository cartRepository;
+    @Autowired private CartItemRepository cartItemRepository;
+    @Autowired private OrderingRepository orderingRepository;
+    @Autowired private AddressRepository addressRepository;
+    @Autowired private ItemRepository itemRepository;
+    @Autowired private PaymentMethodRepository paymentMethodRepository; // [추가]
 
+    // --- [기존 로그인/가입] ---
     @GetMapping("/login")
-    public String loginForm() {
-        return "login";
-    }
+    public String loginForm() { return "login"; }
 
     @GetMapping("/join")
-    public String joinForm() {
-        return "join";
-    }
+    public String joinForm() { return "join"; }
 
-    // 회원가입 처리
     @PostMapping("/join")
-    public String createMember(Member member) {
+    public String createMember(Member member, @RequestParam String passwordConfirm, Model model) {
+        if (!member.getPassword().equals(passwordConfirm)) {
+            model.addAttribute("error", "비밀번호가 일치하지 않습니다.");
+            return "join";
+        }
+        if (memberRepository.findByEmail(member.getEmail()) != null) {
+            model.addAttribute("error", "이미 가입된 이메일입니다.");
+            return "join";
+        }
         memberRepository.save(member);
         return "redirect:/login";
     }
 
-    // --- [로그인 처리 핵심 로직] ---
     @PostMapping("/login")
     public String login(String email, String password, HttpSession session) {
-        // 1. DB에서 이메일로 회원 조회
         Member member = memberRepository.findByEmail(email);
-
-        // 2. 회원이 있고, 비밀번호가 일치하는지 확인
         if (member != null && member.getPassword().equals(password)) {
-            // 3. 로그인 성공! 세션에 회원 정보 저장 ("user"라는 이름표로 저장)
             session.setAttribute("user", member);
-            return "redirect:/"; // 메인 페이지로 이동
+            if (email.equals("joonseo1595743100@gmail.com")) {
+                session.setAttribute("isAdmin", true);
+            } else {
+                session.removeAttribute("isAdmin");
+            }
+            return "redirect:/";
         } else {
-            // 4. 로그인 실패 시 다시 로그인 페이지로
-            System.out.println("로그인 실패: 아이디나 비번이 틀림");
-            return "redirect:/login";
+            return "redirect:/login?error=true";
         }
     }
 
-    // --- [로그아웃 처리] ---
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-        // 세션에 저장된 정보 삭제 (로그아웃)
+        session.invalidate();
+        return "redirect:/";
+    }
+
+    // --- [1. 마이페이지] ---
+    @GetMapping("/my-page")
+    public String myPage(HttpSession session, Model model) {
+        Member member = (Member) session.getAttribute("user");
+        if (member == null) return "redirect:/login";
+
+        model.addAttribute("userName", member.getName());
+        model.addAttribute("email", member.getEmail());
+
+        List<Ordering> orders = orderingRepository.findByMemberOrderByIdDesc(member);
+        if (orders.size() > 3) orders = orders.subList(0, 3);
+        model.addAttribute("recentOrders", orders);
+
+        List<Long> recentIds = (List<Long>) session.getAttribute("recentItems");
+        List<Item> recentItems = new ArrayList<>();
+        if (recentIds != null) {
+            for (Long id : recentIds) {
+                itemRepository.findById(id).ifPresent(recentItems::add);
+            }
+        }
+        model.addAttribute("recentItems", recentItems);
+
+        return "my-page";
+    }
+
+    // --- [2. 정보수정] ---
+    @GetMapping("/my-info")
+    public String myInfo(HttpSession session, Model model) {
+        Member member = (Member) session.getAttribute("user");
+        if (member == null) return "redirect:/login";
+        model.addAttribute("member", memberRepository.findById(member.getId()).orElse(member));
+        return "my-info";
+    }
+
+    @PostMapping("/my-info/update")
+    public String updateMember(Member formMember, HttpSession session) {
+        Member member = memberRepository.findById(formMember.getId()).get();
+        member.setPassword(formMember.getPassword());
+        member.setName(formMember.getName());
+        memberRepository.save(member);
+        session.setAttribute("user", member);
+        return "redirect:/my-page";
+    }
+
+    // --- [3. 배송지 관리] ---
+    @GetMapping("/shipping")
+    public String shippingPage(HttpSession session, Model model) {
+        Member member = (Member) session.getAttribute("user");
+        if (member == null) return "redirect:/login";
+        model.addAttribute("addresses", addressRepository.findByMember(member));
+        return "shipping";
+    }
+
+    @PostMapping("/shipping/add")
+    public String addAddress(Address address, HttpSession session) {
+        Member member = (Member) session.getAttribute("user");
+        if (member == null) return "redirect:/login";
+        address.setMember(member);
+        addressRepository.save(address);
+        return "redirect:/shipping";
+    }
+
+    @PostMapping("/shipping/delete")
+    public String deleteAddress(@RequestParam Long addressId) {
+        addressRepository.deleteById(addressId);
+        return "redirect:/shipping";
+    }
+
+    // --- [4. 결제수단 관리 (추가됨)] ---
+    @GetMapping("/payment")
+    public String paymentPage(HttpSession session, Model model) {
+        Member member = (Member) session.getAttribute("user");
+        if (member == null) return "redirect:/login";
+
+        List<PaymentMethod> cards = paymentMethodRepository.findByMember(member);
+        model.addAttribute("cards", cards);
+
+        return "payment";
+    }
+
+    @PostMapping("/payment/add")
+    public String addCard(PaymentMethod payment, HttpSession session) {
+        Member member = (Member) session.getAttribute("user");
+        if (member == null) return "redirect:/login";
+
+        payment.setMember(member);
+
+        // 카드 색상 랜덤 지정 (그라디언트 CSS 클래스용)
+        String[] colors = {"bg-gradient-primary", "bg-gradient-dark", "bg-gradient-success", "bg-gradient-warning"};
+        payment.setColorStyle(colors[new Random().nextInt(colors.length)]);
+
+        paymentMethodRepository.save(payment);
+        return "redirect:/payment";
+    }
+
+    @PostMapping("/payment/delete")
+    public String deleteCard(@RequestParam Long cardId) {
+        paymentMethodRepository.deleteById(cardId);
+        return "redirect:/payment";
+    }
+
+    // --- [5. 회원 탈퇴] ---
+    @PostMapping("/withdraw")
+    public String withdraw(HttpSession session) {
+        Member member = (Member) session.getAttribute("user");
+        if (member == null) return "redirect:/login";
+
+        Cart cart = cartRepository.findByMemberId(member.getId());
+        if (cart != null) {
+            List<CartItem> items = cartItemRepository.findByCartId(cart.getId());
+            cartItemRepository.deleteAll(items);
+            cartRepository.delete(cart);
+        }
+
+        // 연관 데이터 모두 삭제
+        addressRepository.deleteAll(addressRepository.findByMember(member));
+        paymentMethodRepository.deleteAll(paymentMethodRepository.findByMember(member)); // [추가] 카드 삭제
+        orderingRepository.deleteAll(orderingRepository.findByMemberOrderByIdDesc(member));
+
+        memberRepository.delete(member);
         session.invalidate();
         return "redirect:/";
     }

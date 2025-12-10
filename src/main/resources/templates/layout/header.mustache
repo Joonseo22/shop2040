@@ -1,47 +1,167 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>2040 Shopping Mall</title>
+    <title>2040</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #fff; color: #333; padding-top: 0; }
+        .musinsa-header { background-color: #000; color: #fff; padding: 15px 0; position: relative; z-index: 1001; }
+        .header-inner { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 0 20px; gap: 40px; }
+        .header-left { display: flex; align-items: center; gap: 20px; min-width: 200px; }
+        .menu-btn { color: #fff; font-size: 24px; cursor: pointer; }
+        .main-logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; color: #fff; text-decoration: none; font-family: 'Arial', sans-serif; }
+        .header-center { flex: 1; max-width: 600px; }
+        .search-box { position: relative; width: 100%; }
+        .search-input { width: 100%; padding: 10px 15px; border-radius: 4px; border: none; outline: none; font-size: 14px; }
+        .search-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #333; font-size: 16px; }
+        .header-right { display: flex; align-items: center; gap: 20px; min-width: 200px; justify-content: flex-end; }
+        .icon-link { color: #fff; text-decoration: none; font-size: 20px; position: relative; }
+        .icon-link:hover { color: #ccc; }
+        .nav-event { color: #ff3b3b !important; font-weight: 800; text-decoration: none; font-size: 14px; }
+        .login-box { border: 1px solid #fff; padding: 5px 12px; font-size: 12px; font-weight: 700; border-radius: 4px; text-decoration: none; color: #fff; }
+        .user-dropdown .dropdown-toggle { color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .user-dropdown .dropdown-menu { border-radius: 8px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-top: 10px; z-index: 3000 !important; }
+        .user-dropdown .dropdown-item { padding: 10px 20px; font-size: 13px; font-weight: 500; }
+        .user-dropdown .dropdown-item:hover { background-color: #f8f9fa; color: #000; }
+
+        /* [수정] 4칸 심플 카테고리 오버레이 */
+        .category-overlay {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            color: #333;
+            z-index: 2000;
+            padding: 40px 0;
+        }
+        .simple-cat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .cat-card {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .cat-card:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-5px);
+        }
+        .cat-icon {
+            width: 80px; height: 80px;
+            background-color: #f1f1f1;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px;
+            color: #555;
+        }
+        .cat-title { font-weight: 800; font-size: 18px; margin-bottom: 5px; }
+        .cat-desc { font-size: 12px; color: #888; }
+        .btn-close-menu { position: absolute; top: 20px; right: 20px; font-size: 24px; cursor: pointer; color: #999; }
+    </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">4910 SHOP</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <form class="d-flex mx-auto" action="/" method="get" style="width: 40%;">
-                <input class="form-control me-2" type="search" name="keyword" placeholder="상품을 검색해보세요" aria-label="Search">
-                <button class="btn btn-outline-light" type="submit">검색</button>
+<header class="musinsa-header sticky-top">
+    <div class="header-inner">
+        <div class="header-left">
+            <a href="javascript:void(0)" onclick="toggleCategory()" class="menu-btn"><i class="fas fa-bars"></i></a>
+            <a href="/" class="main-logo">2040</a>
+        </div>
+
+        <div class="header-center">
+            <form action="/" method="get">
+                <div class="search-box">
+                    <input type="text" name="keyword" class="search-input" placeholder="브랜드, 상품, 프로모션 검색">
+                    <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
             </form>
-            <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/">홈</a></li>
+        </div>
 
-                {{#userName}}
-                    <li class="nav-item">
-                        <span class="nav-link text-warning"> {{userName}}님</span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/cart">장바구니</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/my-orders">주문 내역</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">로그아웃</a>
-                    </li>
-                {{/userName}}
+        <div class="header-right">
+            <a href="/event" class="nav-event">EVENT</a>
 
-                {{^userName}}
-                    <li class="nav-item"><a class="nav-link" href="/login">로그인</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/join">회원가입</a></li>
-                {{/userName}}
-            </ul>
+            {{#userName}}
+                {{#isAdmin}}
+                    <a href="/admin" class="icon-link text-danger" title="관리자"><i class="fas fa-user-shield"></i></a>
+                {{/isAdmin}}
+                <a href="/wishlist" class="icon-link"><i class="far fa-heart"></i></a>
+                <a href="/cart" class="icon-link"><i class="fas fa-shopping-bag"></i></a>
+                <a href="/my-page" class="icon-link"><i class="far fa-user"></i></a>
+                <div class="dropdown user-dropdown d-inline-block">
+                    <a href="#" class="dropdown-toggle" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                         {{userName}}님
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                        <li><a class="dropdown-item" href="/my-info">회원정보 / 닉네임 변경</a></li>
+                        <li><a class="dropdown-item" href="/shipping">배송지 관리</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout">로그아웃</a></li>
+                    </ul>
+                </div>
+            {{/userName}}
+
+            {{^userName}}
+                <a href="/cart" class="icon-link"><i class="fas fa-shopping-bag"></i></a>
+                <a href="/login" class="login-box">로그인</a>
+            {{/userName}}
         </div>
     </div>
-</nav>
+
+    <div class="category-overlay" id="categoryOverlay">
+        <i class="fas fa-times btn-close-menu" onclick="toggleCategory()"></i>
+
+        <div class="simple-cat-grid">
+            <a href="/?category=OUTER" class="cat-card">
+                <div class="cat-icon"><i class="fas fa-user-tie"></i></div>
+                <div class="cat-title">아우터</div>
+                <div class="cat-desc">패딩, 코트, 자켓</div>
+            </a>
+
+            <a href="/?category=TOP" class="cat-card">
+                <div class="cat-icon"><i class="fas fa-tshirt"></i></div>
+                <div class="cat-title">상의</div>
+                <div class="cat-desc">티셔츠, 니트, 후드</div>
+            </a>
+
+            <a href="/?category=BOTTOM" class="cat-card">
+                <div class="cat-icon"><i class="fas fa-columns"></i></div>
+                <div class="cat-title">하의</div>
+                <div class="cat-desc">청바지, 슬랙스, 스커트</div>
+            </a>
+
+            <a href="/?category=SHOES" class="cat-card">
+                <div class="cat-icon"><i class="fas fa-shoe-prints"></i></div>
+                <div class="cat-title">신발</div>
+                <div class="cat-desc">스니커즈, 구두, 부츠</div>
+            </a>
+        </div>
+    </div>
+</header>
+
+<script>
+    function toggleCategory() {
+        const overlay = document.getElementById('categoryOverlay');
+        overlay.style.display = (overlay.style.display === 'block') ? 'none' : 'block';
+    }
+</script>

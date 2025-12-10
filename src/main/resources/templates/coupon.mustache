@@ -1,0 +1,106 @@
+{{>layout/header}}
+
+<style>
+    /* 쿠폰 티켓 스타일 */
+    .coupon-ticket {
+        border: 2px dashed #adb5bd;
+        border-radius: 15px;
+        background: #fff;
+        padding: 20px;
+        position: relative;
+        transition: transform 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .coupon-ticket:hover {
+        transform: translateY(-5px);
+        border-color: #0d6efd;
+        background-color: #f8faff;
+    }
+    .coupon-left {
+        flex: 1;
+        border-right: 2px dashed #eee;
+        padding-right: 15px;
+    }
+    .coupon-right {
+        padding-left: 15px;
+        text-align: center;
+        min-width: 100px;
+    }
+
+    /* 사용 완료된 쿠폰 스타일 */
+    .used-coupon {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        opacity: 0.7;
+    }
+</style>
+
+<div class="container mt-5" style="max-width: 800px;">
+    <h2 class="fw-bold mb-4">쿠폰 존</h2>
+
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-dark text-white fw-bold py-3">
+            지금 받을 수 있는 쿠폰
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                {{#coupons}}
+                    <div class="col-md-6">
+                        <div class="coupon-ticket">
+                            <div class="coupon-left">
+                                <h5 class="fw-bold text-primary mb-1">{{discountPrice}}원 할인</h5>
+                                <p class="mb-0 fw-bold">{{name}}</p>
+                            </div>
+                            <div class="coupon-right">
+                                <form action="/coupon/download/{{id}}" method="post">
+                                    <button class="btn btn-sm btn-outline-dark rounded-pill">받기</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {{/coupons}}
+
+                {{^coupons}}
+                    <div class="text-center text-muted py-3">
+                        현재 발급 가능한 쿠폰이 없습니다.
+                    </div>
+                {{/coupons}}
+            </div>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mb-3">내 쿠폰함</h4>
+    <div class="row g-3">
+        {{#myCoupons}}
+            <div class="col-md-6">
+                <div class="coupon-ticket {{#isUsed}}used-coupon{{/isUsed}}">
+                    <div class="coupon-left">
+                        <h5 class="fw-bold {{^isUsed}}text-success{{/isUsed}} mb-1">
+                            {{coupon.discountPrice}}원 할인
+                        </h5>
+                        <p class="mb-0 small text-muted">{{coupon.name}}</p>
+                    </div>
+                    <div class="coupon-right">
+                        {{#isUsed}}
+                            <span class="badge bg-secondary">사용완료</span>
+                        {{/isUsed}}
+                        {{^isUsed}}
+                            <span class="badge bg-primary">사용가능</span>
+                        {{/isUsed}}
+                    </div>
+                </div>
+            </div>
+        {{/myCoupons}}
+
+        {{^myCoupons}}
+            <div class="col-12 text-center py-5 bg-light rounded-4">
+                <span class="fs-1">📭</span>
+                <p class="text-muted mt-2">보유한 쿠폰이 없습니다.</p>
+            </div>
+        {{/myCoupons}}
+    </div>
+</div>
+
+{{>layout/footer}}

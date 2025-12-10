@@ -1,42 +1,182 @@
 {{>layout/header}}
 
-<div class="container mt-5">
-    <div class="p-5 mb-4 bg-light rounded-3">
-        <div class="container-fluid py-5">
-            <h1 class="display-5 fw-bold">4910 Collection</h1>
-            <p class="col-md-8 fs-4">트렌디한 4910 아이템을 실시간으로 만나보세요.</p>
+<style>
+    .hero-banner {
+        background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+        background-size: cover;
+        background-position: center;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-bottom: 50px;
+        border-radius: 0 0 30px 30px;
+    }
+
+    .product-card {
+        border: none;
+        border-radius: 15px;
+        background: white;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .card-img-top {
+        height: 300px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .product-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    .brand-badge {
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: #888;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+    .product-name {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 5px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .product-price {
+        font-size: 18px;
+        font-weight: 800;
+        color: #111;
+    }
+
+    .wish-btn-form { position: absolute; top: 15px; right: 15px; z-index: 10; }
+    .wish-btn {
+        width: 35px; height: 35px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.9);
+        border: none; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s;
+    }
+    .wish-btn:hover { transform: scale(1.1); background-color: white; }
+
+    .event-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: linear-gradient(45deg, #6610f2, #d63384);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 800;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="hero-banner">
+        <div class="text-center">
+            <h1 class="display-4 fw-bold">2025 NEW COLLECTION</h1>
+            <p class="lead">당신의 일상을 특별하게 만드는 스타일</p>
+            <a href="#new-arrival" class="btn btn-light rounded-pill px-4 py-2 fw-bold mt-3">SHOP NOW</a>
         </div>
-    </div>
-
-    <h3 class="mb-3">🔥 4910 추천 상품</h3>
-
-    <div class="row">
-        {{#items}}
-            <div class="col-md-4">
-                <div class="card mb-4 shadow-sm">
-                    <a href="/item/{{id}}">
-                        <img src="{{imgUrl}}" class="card-img-top" alt="{{name}}" height="300" style="object-fit: cover;">
-                    </a>
-
-                    <div class="card-body">
-                        <p class="text-secondary mb-1" style="font-size: 0.9em;">{{brand}}</p>
-                        <h5 class="card-title text-truncate">{{name}}</h5>
-
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fw-bold">{{price}}원</span>
-                            <button type="button" class="btn btn-sm btn-outline-dark">구매하기</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {{/items}}
-
-        {{^items}}
-            <div class="col-12 text-center py-5">
-                <p>현재 등록된 상품이 없습니다. 서버를 재시작하면 크롤링이 시작됩니다!</p>
-            </div>
-        {{/items}}
     </div>
 </div>
 
+<div class="container" id="new-arrival">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold">{{sectionTitle}}</h2>
+            <p class="text-muted mb-0">{{sectionDesc}}</p>
+        </div>
+        <a href="/" class="text-decoration-none text-dark fw-bold small">VIEW ALL ></a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
+        {{#items}}
+            <div class="col">
+                <div class="card h-100 product-card">
+
+                    {{#isEvent}}
+                        <div class="event-badge">EVENT</div>
+                    {{/isEvent}}
+
+                    {{^isAdmin}}
+                        <div class="wish-btn-area">
+                            <button class="wish-btn" onclick="toggleWish(event, {{id}})">
+                                {{#isWished}}
+                                    <i id="heart-icon-{{id}}" class="fas fa-heart text-danger"></i>
+                                {{/isWished}}
+                                {{^isWished}}
+                                    <i id="heart-icon-{{id}}" class="far fa-heart text-secondary"></i>
+                                {{/isWished}}
+                            </button>
+                        </div>
+                    {{/isAdmin}}
+
+                    <a href="/item/{{id}}" class="text-decoration-none text-dark">
+                        <div class="position-relative overflow-hidden">
+                            <img src="{{imgUrl}}" class="card-img-top" alt="{{name}}">
+                        </div>
+
+                        <div class="card-body pt-3 pb-4 px-3">
+                            <div class="brand-badge">{{category}}</div>
+                            <h5 class="product-name">{{name}}</h5>
+
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                {{#isDiscounted}}
+                                    <div>
+                                        <span class="text-decoration-line-through text-muted small me-1">{{price}}</span>
+                                        <span class="product-price text-danger">{{salePrice}}원</span>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill">{{discountRate}}%</span>
+                                {{/isDiscounted}}
+
+                                {{^isDiscounted}}
+                                    <span class="product-price">{{price}}원</span>
+                                {{/isDiscounted}}
+                            </div>
+
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {{/items}}
+    </div>
+
+    {{^items}}
+        <div class="text-center py-5">
+            <h3 class="text-muted">해당하는 상품이 없습니다.</h3>
+        </div>
+    {{/items}}
+</div>
+
 {{>layout/footer}}
+
+<script>
+    function toggleWish(event, itemId) {
+        event.preventDefault();
+        event.stopPropagation();
+        fetch('/api/wish/' + itemId, { method: 'POST' })
+        .then(response => response.json())
+        .then(isWished => {
+            const icon = document.getElementById('heart-icon-' + itemId);
+            if (isWished) {
+                icon.className = 'fas fa-heart text-danger';
+                icon.style.transform = 'scale(1.2)';
+                setTimeout(() => icon.style.transform = 'scale(1)', 200);
+            } else {
+                icon.className = 'far fa-heart text-secondary';
+            }
+        })
+        .catch(error => {
+            alert('로그인이 필요한 서비스입니다.');
+            window.location.href = '/login';
+        });
+    }
+</script>
