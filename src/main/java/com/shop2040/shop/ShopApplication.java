@@ -18,7 +18,7 @@ public class ShopApplication {
     @Bean
     public CommandLineRunner demo(SeleniumService seleniumService, CouponRepository couponRepository) {
         return (args) -> {
-            //seleniumService.crawl4910(); // 크롤링은 주석 처리 유지
+           // seleniumService.crawl4910(); //4910사이트
 
             // [추가] 기본 쿠폰 생성 (없을 때만)
             if (couponRepository.count() == 0) {

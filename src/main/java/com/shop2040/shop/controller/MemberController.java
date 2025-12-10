@@ -23,7 +23,7 @@ public class MemberController {
     @Autowired private OrderingRepository orderingRepository;
     @Autowired private AddressRepository addressRepository;
     @Autowired private ItemRepository itemRepository;
-    @Autowired private PaymentMethodRepository paymentMethodRepository; // [추가]
+    @Autowired private PaymentMethodRepository paymentMethodRepository;
 
     // --- [기존 로그인/가입] ---
     @GetMapping("/login")
@@ -74,8 +74,10 @@ public class MemberController {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
+        // [중요] 화면에 로그인 정보를 전달해야 헤더가 안 풀림
         model.addAttribute("userName", member.getName());
         model.addAttribute("email", member.getEmail());
+        if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
 
         List<Ordering> orders = orderingRepository.findByMemberOrderByIdDesc(member);
         if (orders.size() > 3) orders = orders.subList(0, 3);
@@ -98,6 +100,11 @@ public class MemberController {
     public String myInfo(HttpSession session, Model model) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
+
+        // [추가됨] 이름 정보 전달
+        model.addAttribute("userName", member.getName());
+        if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
+
         model.addAttribute("member", memberRepository.findById(member.getId()).orElse(member));
         return "my-info";
     }
@@ -117,6 +124,11 @@ public class MemberController {
     public String shippingPage(HttpSession session, Model model) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
+
+        // [추가됨] 이름 정보 전달 -> 이제 배송지 관리 가도 로그인 유지된 것처럼 보임
+        model.addAttribute("userName", member.getName());
+        if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
+
         model.addAttribute("addresses", addressRepository.findByMember(member));
         return "shipping";
     }
@@ -136,11 +148,15 @@ public class MemberController {
         return "redirect:/shipping";
     }
 
-    // --- [4. 결제수단 관리 (추가됨)] ---
+    // --- [4. 결제수단 관리] ---
     @GetMapping("/payment")
     public String paymentPage(HttpSession session, Model model) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
+
+        // [추가됨] 이름 정보 전달 -> 카드 관리 가도 로그인 유지
+        model.addAttribute("userName", member.getName());
+        if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
 
         List<PaymentMethod> cards = paymentMethodRepository.findByMember(member);
         model.addAttribute("cards", cards);
@@ -154,8 +170,6 @@ public class MemberController {
         if (member == null) return "redirect:/login";
 
         payment.setMember(member);
-
-        // 카드 색상 랜덤 지정 (그라디언트 CSS 클래스용)
         String[] colors = {"bg-gradient-primary", "bg-gradient-dark", "bg-gradient-success", "bg-gradient-warning"};
         payment.setColorStyle(colors[new Random().nextInt(colors.length)]);
 
@@ -182,9 +196,8 @@ public class MemberController {
             cartRepository.delete(cart);
         }
 
-        // 연관 데이터 모두 삭제
         addressRepository.deleteAll(addressRepository.findByMember(member));
-        paymentMethodRepository.deleteAll(paymentMethodRepository.findByMember(member)); // [추가] 카드 삭제
+        paymentMethodRepository.deleteAll(paymentMethodRepository.findByMember(member));
         orderingRepository.deleteAll(orderingRepository.findByMemberOrderByIdDesc(member));
 
         memberRepository.delete(member);
