@@ -40,7 +40,6 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    // [수정됨] 상품 정보 수정 (카테고리 추가됨)
     @PostMapping("/admin/item/update")
     public String updateItem(@RequestParam Long itemId,
                              @RequestParam String name,
@@ -57,7 +56,6 @@ public class AdminController {
             item.setPrice(price);
             item.setImgUrl(imgUrl);
 
-            // 문자열("OUTER")을 Enum(ItemCategory.OUTER)으로 변환해서 저장
             item.setCategory(ItemCategory.valueOf(category));
 
             itemRepository.save(item);

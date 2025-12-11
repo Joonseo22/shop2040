@@ -8,7 +8,7 @@
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>👮‍♂️ 관리자 주문 관리 시스템</h1>
+        <h1>관리자 주문 관리 시스템</h1>
         <a href="/" class="btn btn-outline-dark">쇼핑몰 메인으로</a>
     </div>
 
@@ -38,13 +38,13 @@
                                 <form action="/admin/order/status" method="post" class="d-inline">
                                     <input type="hidden" name="orderId" value="{{id}}">
                                     <input type="hidden" name="status" value="SHIPPING">
-                                    <button class="btn btn-primary btn-sm me-1">🚚 배송 시작</button>
+                                    <button class="btn btn-primary btn-sm me-1">배송 시작</button>
                                 </form>
 
                                 <form action="/admin/order/status" method="post" class="d-inline">
                                     <input type="hidden" name="orderId" value="{{id}}">
                                     <input type="hidden" name="status" value="DELIVERED">
-                                    <button class="btn btn-success btn-sm">✅ 배송 완료</button>
+                                    <button class="btn btn-success btn-sm">배송 완료</button>
                                 </form>
                             </div>
                         </td>

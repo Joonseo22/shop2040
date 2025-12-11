@@ -24,8 +24,6 @@ public class Review {
 
     private LocalDateTime createdDate;
 
-    // --- Mustache 화면용 도우미 ---
-    // 점수만큼 별 이모지를 반복해서 반환 (예: score가 5면 ⭐⭐⭐⭐⭐)
     public String getStarDisplay() {
         return "⭐".repeat(score);
     }

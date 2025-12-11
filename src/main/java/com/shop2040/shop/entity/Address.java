@@ -14,7 +14,7 @@ public class Address {
     @ManyToOne
     private Member member;
 
-    private String addressName; // 배송지명 (예: 우리집, 회사)
-    private String fullAddress; // 주소
-    private String detailAddress; // 상세주소
+    private String addressName;
+    private String fullAddress;
+    private String detailAddress;
 }

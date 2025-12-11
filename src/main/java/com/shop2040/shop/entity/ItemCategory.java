@@ -4,7 +4,7 @@ public enum ItemCategory {
     OUTER("아우터"),
     TOP("상의"),
     BOTTOM("하의"),
-    SHOES("신발"); // [변경] ACC 제거, SHOES 추가
+    SHOES("신발");
 
     private final String description;
 

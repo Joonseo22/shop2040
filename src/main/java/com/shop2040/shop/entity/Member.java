@@ -12,7 +12,6 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // [수정] unique = true : 똑같은 이메일이 들어오면 DB가 알아서 튕겨냄!
     @Column(unique = true)
     private String email;
 

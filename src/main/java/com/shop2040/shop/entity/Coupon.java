@@ -15,6 +15,6 @@ public class Coupon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;         // 쿠폰 이름 (예: 신규가입 3000원 할인)
-    private int discountPrice;   // 할인 금액 (예: 3000)
+    private String name;
+    private int discountPrice;
 }

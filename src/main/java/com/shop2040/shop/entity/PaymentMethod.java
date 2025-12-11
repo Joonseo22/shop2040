@@ -15,9 +15,9 @@ public class PaymentMethod {
     @ManyToOne
     private Member member;
 
-    private String cardCompany; // 카드사 (예: 신한카드, 현대카드)
-    private String cardNumber;  // 카드번호 (예: 1234-5678-****-****)
-    private String cardNickname; // 별칭 (예: 내 월급통장)
+    private String cardCompany;
+    private String cardNumber;
+    private String cardNickname;
 
     // 카드 배경색 스타일 (디자인용)
     private String colorStyle;

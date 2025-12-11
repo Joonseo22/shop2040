@@ -39,11 +39,9 @@ public class Item {
         return discountRate > 0;
     }
 
-    // [수정된 부분] 관리자 페이지 셀렉트 박스용 메서드
     public boolean isOuter() { return this.category == ItemCategory.OUTER; }
     public boolean isTop() { return this.category == ItemCategory.TOP; }
     public boolean isBottom() { return this.category == ItemCategory.BOTTOM; }
 
-    // [변경] isAcc() -> isShoes()로 변경하고 ItemCategory.SHOES와 비교
     public boolean isShoes() { return this.category == ItemCategory.SHOES; }
 }

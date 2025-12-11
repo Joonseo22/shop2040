@@ -14,11 +14,11 @@ public class MemberCoupon {
     private Long id;
 
     @ManyToOne
-    private Member member;      // 쿠폰 주인
+    private Member member;
 
     @ManyToOne
-    private Coupon coupon;      // 어떤 쿠폰인지
+    private Coupon coupon;
 
-    private boolean isUsed;     // 사용 여부 (true면 사용완료)
-    private LocalDateTime usedDate; // 사용 날짜
+    private boolean isUsed;
+    private LocalDateTime usedDate;
 }
