@@ -22,7 +22,6 @@ public class CartItem {
 
     private int count;
 
-    // 장바구니 아이템 생성 메서드
     public static CartItem createCartItem(Cart cart, Item item, int count) {
         CartItem cartItem = new CartItem();
         cartItem.setCart(cart);

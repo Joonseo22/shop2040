@@ -45,14 +45,14 @@
         <div class="col-lg-4 mt-4 mt-lg-0">
             <div class="card border-0 shadow-sm bg-light">
                 <div class="card-header bg-dark text-white fw-bold">
-                    📝 주문서 작성
+                    주문서 작성
                 </div>
                 <div class="card-body p-4">
 
                     <form action="/cart/checkout" method="post" onsubmit="return validateOrder()">
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold small">🚚 배송지 선택</label>
+                            <label class="form-label fw-bold small">배송지 선택</label>
                             {{#addresses.0}}
                                 <select class="form-select" name="addressId" required>
                                     {{#addresses}}
@@ -70,7 +70,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold small">💳 결제수단 선택</label>
+                            <label class="form-label fw-bold small">결제수단 선택</label>
                             {{#cards.0}}
                                 <select class="form-select" name="cardId" required>
                                     {{#cards}}

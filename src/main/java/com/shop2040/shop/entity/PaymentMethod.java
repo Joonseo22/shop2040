@@ -19,6 +19,6 @@ public class PaymentMethod {
     private String cardNumber;
     private String cardNickname;
 
-    // 카드 배경색 스타일 (디자인용)
+
     private String colorStyle;
 }

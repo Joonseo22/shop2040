@@ -27,11 +27,9 @@ public class Ordering {
     private boolean isReviewed;
     private int discountPrice;
 
-    // [추가됨] 주문 당시의 배송지와 결제수단 정보 (텍스트로 박제)
     private String shippingAddress;
     private String paymentInfo;
 
-    // --- [Mustache 화면 처리를 위한 도우미 메서드들] ---
 
     public String getFinalPrice() {
         if (item == null) return "0";

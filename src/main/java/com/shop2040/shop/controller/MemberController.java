@@ -25,7 +25,7 @@ public class MemberController {
     @Autowired private ItemRepository itemRepository;
     @Autowired private PaymentMethodRepository paymentMethodRepository;
 
-    // --- [기존 로그인/가입] ---
+    // 로그인/회원가입
     @GetMapping("/login")
     public String loginForm() { return "login"; }
 

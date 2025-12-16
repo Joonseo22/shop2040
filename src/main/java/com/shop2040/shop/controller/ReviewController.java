@@ -25,7 +25,6 @@ public class ReviewController {
     @Autowired private OrderingRepository orderingRepository;
     @Autowired private ItemRepository itemRepository;
 
-    // savePath 제거됨
 
     @GetMapping("/review/write")
     public String reviewForm(@RequestParam Long orderId, HttpSession session, Model model) {
@@ -47,7 +46,7 @@ public class ReviewController {
         return "review-form";
     }
 
-    // [수정] 파일 업로드 파라미터 및 로직 제거
+    // 파일 업로드 파라미터 및 로직 제거
     @PostMapping("/review/create")
     public String createReview(@RequestParam Long orderId,
                                @RequestParam String content,
@@ -67,7 +66,6 @@ public class ReviewController {
             review.setScore(score);
             review.setCreatedDate(LocalDateTime.now());
 
-            // imgUrl 설정 로직 제거됨
 
             reviewRepository.save(review);
 
