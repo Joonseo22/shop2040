@@ -60,7 +60,7 @@ public class HomeController {
     public String eventPage(Model model, HttpSession session) {
         List<Item> items = itemRepository.findByIsEventTrue();
         prepareModel(model, session, items);
-        model.addAttribute("sectionTitle", "🔥 금주의 특가 이벤트");
+        model.addAttribute("sectionTitle", "금주의 특가 이벤트");
         model.addAttribute("sectionDesc", "한정수량! 놓치면 후회할 초특가 상품을 만나보세요.");
         return "home";
     }
