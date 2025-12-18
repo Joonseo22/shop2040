@@ -7,12 +7,9 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    // 이름으로 검색
     List<Item> findByNameContaining(String keyword);
 
-    // 카테고리별 조회
     List<Item> findByCategory(ItemCategory category);
 
-    // 이벤트 상품만 조회
     List<Item> findByIsEventTrue();
 }

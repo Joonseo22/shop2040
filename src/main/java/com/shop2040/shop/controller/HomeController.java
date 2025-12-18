@@ -89,17 +89,14 @@ public class HomeController {
             Item item = itemOptional.get();
             model.addAttribute("item", item);
 
-            // [리뷰 통계 계산 로직]
             List<Review> reviews = reviewRepository.findByItemIdOrderByIdDesc(id);
             model.addAttribute("reviews", reviews);
             model.addAttribute("reviewCount", reviews.size());
 
             if (!reviews.isEmpty()) {
-                // 1. 평균 별점 계산
                 double average = reviews.stream().mapToInt(Review::getScore).average().orElse(0.0);
                 model.addAttribute("averageScore", String.format("%.1f", average)); // 소수점 한자리
 
-                // 2. 점수별 개수 및 비율(%) 계산 (막대 그래프용)
                 int[] counts = new int[6]; // 0~5 인덱스 사용 (1점~5점 저장)
                 for (Review r : reviews) counts[r.getScore()]++;
 
@@ -109,7 +106,6 @@ public class HomeController {
                 model.addAttribute("score2", counts[2]);
                 model.addAttribute("score1", counts[1]);
 
-                // 비율 계산 (전체 개수로 나눠서 100 곱함)
                 model.addAttribute("per5", counts[5] * 100 / reviews.size());
                 model.addAttribute("per4", counts[4] * 100 / reviews.size());
                 model.addAttribute("per3", counts[3] * 100 / reviews.size());
@@ -119,7 +115,6 @@ public class HomeController {
                 model.addAttribute("averageScore", "0.0");
             }
 
-            // 최근 본 상품
             List<Long> recentItems = (List<Long>) session.getAttribute("recentItems");
             if (recentItems == null) recentItems = new ArrayList<>();
             if (recentItems.contains(id)) recentItems.remove(id);

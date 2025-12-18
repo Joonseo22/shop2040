@@ -46,7 +46,6 @@ public class ReviewController {
         return "review-form";
     }
 
-    // 파일 업로드 파라미터 및 로직 제거
     @PostMapping("/review/create")
     public String createReview(@RequestParam Long orderId,
                                @RequestParam String content,

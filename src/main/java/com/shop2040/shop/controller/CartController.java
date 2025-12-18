@@ -77,7 +77,6 @@ public class CartController {
 
         List<MemberCoupon> myCoupons = memberCouponRepository.findByMemberAndIsUsedFalse(member);
 
-        // [추가] 배송지와 결제수단 목록 가져오기
         List<Address> addresses = addressRepository.findByMember(member);
         List<PaymentMethod> cards = paymentMethodRepository.findByMember(member);
 
@@ -97,7 +96,6 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // [수정됨] 결제 로직: 배송지/결제수단 저장 추가
     @PostMapping("/cart/checkout")
     public String checkout(HttpSession session,
                            @RequestParam(required = false) Long memberCouponId,
@@ -116,7 +114,6 @@ public class CartController {
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
         if (cartItems.isEmpty()) return "redirect:/cart";
 
-        // 1. 배송지 정보 찾기
         String shippingInfo = "배송지 미지정";
         if (addressId != null) {
             Optional<Address> addr = addressRepository.findById(addressId);
@@ -125,7 +122,6 @@ public class CartController {
             }
         }
 
-        // 2. 결제 카드 정보 찾기
         String paymentInfo = "결제수단 미지정";
         if (cardId != null) {
             Optional<PaymentMethod> card = paymentMethodRepository.findById(cardId);
@@ -134,7 +130,6 @@ public class CartController {
             }
         }
 
-        // 3. 쿠폰 처리
         int discountAmount = 0;
         if (memberCouponId != null) {
             Optional<MemberCoupon> mcOptional = memberCouponRepository.findById(memberCouponId);
@@ -149,7 +144,6 @@ public class CartController {
             }
         }
 
-        // 4. 주문 생성
         for (int i = 0; i < cartItems.size(); i++) {
             CartItem cartItem = cartItems.get(i);
             Ordering order = new Ordering();
@@ -158,7 +152,6 @@ public class CartController {
             order.setOrderDate(LocalDateTime.now());
             order.setStatus(OrderStatus.PREPARING);
 
-            // [저장] 배송지 및 결제 정보 저장
             order.setShippingAddress(shippingInfo);
             order.setPaymentInfo(paymentInfo);
 

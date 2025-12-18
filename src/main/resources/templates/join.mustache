@@ -77,7 +77,6 @@
     const pw2 = document.getElementById('pw2');
     const msg = document.getElementById('pw-msg');
 
-    // 비밀번호 입력할 때마다 실행
     function validatePw() {
         if(pw2.value === '') {
             msg.innerText = '';
@@ -96,13 +95,12 @@
     pw1.addEventListener('keyup', validatePw);
     pw2.addEventListener('keyup', validatePw);
 
-    // 가입 버튼 누를 때 최종 확인
     function checkPassword() {
         if(pw1.value !== pw2.value) {
             alert('비밀번호가 일치하지 않습니다. 다시 확인해주세요.');
             pw2.focus();
-            return false; // 전송 막기
+            return false;
         }
-        return true; // 전송 허용
+        return true;
     }
 </script>

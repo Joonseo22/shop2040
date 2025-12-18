@@ -68,13 +68,11 @@ public class MemberController {
         return "redirect:/";
     }
 
-    // --- [1. 마이페이지] ---
     @GetMapping("/my-page")
     public String myPage(HttpSession session, Model model) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // [중요] 화면에 로그인 정보를 전달해야 헤더가 안 풀림
         model.addAttribute("userName", member.getName());
         model.addAttribute("email", member.getEmail());
         if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
@@ -95,13 +93,11 @@ public class MemberController {
         return "my-page";
     }
 
-    // --- [2. 정보수정] ---
     @GetMapping("/my-info")
     public String myInfo(HttpSession session, Model model) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // [추가됨] 이름 정보 전달
         model.addAttribute("userName", member.getName());
         if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
 
@@ -119,13 +115,11 @@ public class MemberController {
         return "redirect:/my-page";
     }
 
-    // --- [3. 배송지 관리] ---
     @GetMapping("/shipping")
     public String shippingPage(HttpSession session, Model model) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // [추가됨] 이름 정보 전달 -> 이제 배송지 관리 가도 로그인 유지된 것처럼 보임
         model.addAttribute("userName", member.getName());
         if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
 
@@ -148,13 +142,11 @@ public class MemberController {
         return "redirect:/shipping";
     }
 
-    // --- [4. 결제수단 관리] ---
     @GetMapping("/payment")
     public String paymentPage(HttpSession session, Model model) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // [추가됨] 이름 정보 전달 -> 카드 관리 가도 로그인 유지
         model.addAttribute("userName", member.getName());
         if (session.getAttribute("isAdmin") != null) model.addAttribute("isAdmin", true);
 
@@ -183,7 +175,6 @@ public class MemberController {
         return "redirect:/payment";
     }
 
-    // --- [5. 회원 탈퇴] ---
     @PostMapping("/withdraw")
     public String withdraw(HttpSession session) {
         Member member = (Member) session.getAttribute("user");

@@ -44,7 +44,6 @@
     <h3 class="fw-bold mb-4">New Arrivals</h3>
 
     <style>
-        /* 카드 호버 효과 */
         .item-card {
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
@@ -55,7 +54,7 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
         }
 
-        /* 찜 버튼 (하트) 스타일 */
+        /* 찜 버튼 */
         .wish-btn {
             position: absolute;
             top: 10px;
@@ -155,7 +154,6 @@
         })
         .then(response => {
             if (response.status === 401) {
-                // 로그인이 안 된 경우에만 알림을 띄우고 이동합니다.
                 if(confirm('로그인이 필요한 서비스입니다. 로그인 페이지로 이동하시겠습니까?')) {
                      location.href = '/login';
                 }
@@ -163,11 +161,10 @@
             }
             if (response.ok) {
                 const heart = document.getElementById('heart-' + itemId);
-                // 알림(alert) 없이 아이콘 모양만 바꿉니다.
                 if (heart.classList.contains('far')) {
-                    heart.classList.replace('far', 'fas'); // 빈 하트 -> 채워진 하트
+                    heart.classList.replace('far', 'fas');
                 } else {
-                    heart.classList.replace('fas', 'far'); // 채워진 하트 -> 빈 하트
+                    heart.classList.replace('fas', 'far');
                 }
             }
         });

@@ -22,16 +22,13 @@ public class CouponController {
     @Autowired private CouponRepository couponRepository;
     @Autowired private MemberCouponRepository memberCouponRepository;
 
-    // 1. 쿠폰 존 (발급 가능한 쿠폰 + 내 쿠폰함)
     @GetMapping("/coupon")
     public String couponPage(Model model, HttpSession session) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        // 전체 발급 가능 쿠폰 목록
         List<Coupon> allCoupons = couponRepository.findAll();
 
-        // 내 보유 쿠폰 목록
         List<MemberCoupon> myCoupons = memberCouponRepository.findByMemberOrderByIdDesc(member);
 
         model.addAttribute("coupons", allCoupons);
@@ -41,7 +38,6 @@ public class CouponController {
         return "coupon";
     }
 
-    // 2. 쿠폰 받기 (다운로드)
     @PostMapping("/coupon/download/{id}")
     public String downloadCoupon(@PathVariable Long id, HttpSession session) {
         Member member = (Member) session.getAttribute("user");
@@ -49,7 +45,6 @@ public class CouponController {
 
         Coupon coupon = couponRepository.findById(id).orElse(null);
         if (coupon != null) {
-            // 이미 받았는지 확인
             Optional<MemberCoupon> existing = memberCouponRepository.findByMemberAndCoupon(member, coupon);
 
             if (existing.isEmpty()) {

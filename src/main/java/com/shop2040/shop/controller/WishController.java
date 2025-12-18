@@ -25,13 +25,13 @@ public class WishController {
     @Autowired private WishRepository wishRepository;
     @Autowired private ItemRepository itemRepository;
 
-    // 찜하기
+
     @PostMapping("/wish/{itemId}")
     public String toggleWish(@PathVariable Long itemId, HttpSession session, HttpServletRequest request) {
         Member member = (Member) session.getAttribute("user");
         if (member == null) return "redirect:/login";
 
-        processWish(member, itemId); // 로직 분리
+        processWish(member, itemId);
 
         String referer = request.getHeader("Referer");
         return "redirect:" + (referer != null ? referer : "/");
@@ -54,14 +54,14 @@ public class WishController {
         Optional<Wish> wishOptional = wishRepository.findByMemberAndItem(member, item);
         if (wishOptional.isPresent()) {
             wishRepository.delete(wishOptional.get());
-            return false; // 찜 취소
+            return false;
         } else {
             Wish wish = new Wish();
             wish.setMember(member);
             wish.setItem(item);
             wish.setCreatedDate(LocalDateTime.now());
             wishRepository.save(wish);
-            return true; // 찜
+            return true;
         }
     }
 
